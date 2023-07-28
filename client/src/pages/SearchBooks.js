@@ -5,7 +5,7 @@ import {
   Form,
   Button,
   Card,
-  Row
+  Row,
 } from 'react-bootstrap';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { QUERY_ME, SEARCH_GOOGLE_BOOKS } from '../utils/queries';
@@ -17,9 +17,11 @@ const SearchBooks = () => {
   const [searchedBooks, setSearchedBooks] = useState([]);
   const [searchInput, setSearchInput] = useState('');
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const [getBooks, { loading, data }] = useLazyQuery(SEARCH_GOOGLE_BOOKS);
-  const [saveBook, { error }] = useMutation(SAVE_BOOK);
+  const [getBooks, { data }] = useLazyQuery(SEARCH_GOOGLE_BOOKS);
+  const [saveBook] = useMutation(SAVE_BOOK);
 
   useEffect(() => {
     return () => saveBookIds(savedBookIds);
@@ -33,8 +35,13 @@ const SearchBooks = () => {
     }
 
     try {
+      setError(null);
+      setLoading(true);
       await getBooks({ variables: { title: searchInput } });
+      setLoading(false);
     } catch (err) {
+      setLoading(false);
+      setError('An error occurred while searching.');
       console.error(err);
     }
   };
@@ -63,25 +70,29 @@ const SearchBooks = () => {
     }
 
     try {
+      setError(null);
       await saveBook({
         variables: { bookData: bookToSave },
-        update(cache) {
-          const { me } = cache.readQuery({ query: QUERY_ME });
-          cache.writeQuery({
-            query: QUERY_ME,
-            data: { me: { ...me, savedBooks: [...me.savedBooks, bookToSave] } }
-          });
-        }
+        update(cache, { data }) {
+          if (data.saveBook) {
+            const { me } = cache.readQuery({ query: QUERY_ME });
+            cache.writeQuery({
+              query: QUERY_ME,
+              data: { me: { ...me, savedBooks: [...me.savedBooks, data.saveBook] } },
+            });
+          }
+        },
       });
 
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
     } catch (err) {
+      setError('An error occurred while saving the book.');
       console.error(err);
     }
   };
 
   return (
-<>
+    <>
       <div className="text-light bg-dark p-5">
         <Container>
           <h1>Search for Books!</h1>
@@ -98,14 +109,16 @@ const SearchBooks = () => {
                 />
               </Col>
               <Col xs={12} md={4}>
-                <Button type='submit' variant='success' size='lg'>
-                  Submit Search
+                <Button type='submit' variant='success' size='lg' disabled={loading}>
+                  {loading ? 'Loading...' : 'Submit Search'}
                 </Button>
               </Col>
             </Row>
           </Form>
         </Container>
       </div>
+
+      {error && <div className="error">{error}</div>}
 
       <Container>
         <h2 className='pt-5'>
@@ -116,7 +129,7 @@ const SearchBooks = () => {
         <Row>
           {searchedBooks.map((book) => {
             return (
-              <Col md="4">
+              <Col md='4'>
                 <Card key={book.bookId} border='dark'>
                   {book.image ? (
                     <Card.Img src={book.image} alt={`The cover for ${book.title}`} variant='top' />
