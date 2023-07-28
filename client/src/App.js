@@ -1,11 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client'; // Import the necessary Apollo Client dependencies
+import { ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
 import SearchBooks from './pages/SearchBooks';
 import SavedBooks from './pages/SavedBooks';
 import Navbar from './components/Navbar';
 
-// Create the Apollo Client instance
 const client = new ApolloClient({
   uri: 'http://localhost:3001/graphql', 
   cache: new InMemoryCache(),
