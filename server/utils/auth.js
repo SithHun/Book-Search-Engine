@@ -4,7 +4,8 @@ const secret = 'mysecretssshhhhhhh';
 const expiration = '2h';
 
 module.exports = {
-  authMiddleware: function ({ req }) {
+  authMiddleware: context => {
+    const { req } = context
     // allows token to be sent via req.body, req.query, or headers
     let token = req.body.token || req.query.token || req.headers.authorization;
 
@@ -14,7 +15,7 @@ module.exports = {
     }
 
     if (!token) {
-      return req;
+      return req
     }
 
     // if token can be verified, add the decoded user's data to the request so it can be accessed in the resolver

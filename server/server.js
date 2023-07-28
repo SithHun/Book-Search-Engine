@@ -16,7 +16,7 @@ const startServer = async () => {
   await server.start();
   
   const app = express();
-  server.applyMiddleware({ app });
+  server.applyMiddleware({ app, path: '/graphql' });
 
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
