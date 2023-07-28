@@ -7,8 +7,9 @@ import {
   Card,
   Row,
 } from 'react-bootstrap';
-import { useLazyQuery, useMutation } from '@apollo/client';
-import { QUERY_ME, SEARCH_GOOGLE_BOOKS } from '../utils/queries';
+import { useMutation } from '@apollo/client';
+import { QUERY_ME } from '../utils/queries';
+import { searchGoogleBooks } from '../utils/API';
 import { SAVE_BOOK } from '../utils/mutations';
 import Auth from '../utils/auth';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
@@ -20,7 +21,7 @@ const SearchBooks = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const [getBooks, { data }] = useLazyQuery(SEARCH_GOOGLE_BOOKS);
+  // const [getBooks, { data }] = useLazyQuery(SEARCH_GOOGLE_BOOKS);
   const [saveBook] = useMutation(SAVE_BOOK);
 
   useEffect(() => {
@@ -35,9 +36,28 @@ const SearchBooks = () => {
     }
 
     try {
+      const response = await searchGoogleBooks(searchInput);
+
+      if (!response.ok) {
+        throw new Error('something went wrong!');
+      }
+
+      const { items } = await response.json();
+
+      const bookData = items.map((book) => ({
+        bookId: book.id,
+        authors: book.volumeInfo.authors || ['No author to display'],
+        title: book.volumeInfo.title,
+        description: book.volumeInfo.description,
+        image: book.volumeInfo.imageLinks?.thumbnail || '',
+      }));
+
+      setSearchedBooks(bookData);
+      setSearchInput('');
+
       setError(null);
       setLoading(true);
-      await getBooks({ variables: { title: searchInput } });
+      // await getBooks({ variables: { title: searchInput } });
       setLoading(false);
     } catch (err) {
       setLoading(false);
@@ -46,20 +66,20 @@ const SearchBooks = () => {
     }
   };
 
-  useEffect(() => {
-    if (data) {
-      const bookData = data.books.map((book) => ({
-        bookId: book.id,
-        authors: book.authors || ['No author to display'],
-        title: book.title,
-        description: book.description,
-        image: book.image || '',
-      }));
+  // useEffect(() => {
+  //   if (data) {
+  //     const bookData = data.books.map((book) => ({
+  //       bookId: book.id,
+  //       authors: book.authors || ['No author to display'],
+  //       title: book.title,
+  //       description: book.description,
+  //       image: book.image || '',
+  //     }));
 
-      setSearchedBooks(bookData);
-      setSearchInput('');
-    }
-  }, [data]);
+  //     setSearchedBooks(bookData);
+  //     setSearchInput('');
+  //   }
+  // }, [data]);
 
   const handleSaveBook = async (bookId) => {
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
@@ -127,9 +147,9 @@ const SearchBooks = () => {
             : 'Search for a book to begin'}
         </h2>
         <Row>
-          {searchedBooks.map((book) => {
+          {searchedBooks.map((book,key) => {
             return (
-              <Col md='4'>
+              <Col md='4' key={key}>
                 <Card key={book.bookId} border='dark'>
                   {book.image ? (
                     <Card.Img src={book.image} alt={`The cover for ${book.title}`} variant='top' />

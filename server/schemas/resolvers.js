@@ -1,7 +1,7 @@
 const { User, Book } = require('../models');
 const { AuthenticationError } = require('apollo-server-express');
 const { signToken } = require('../utils/auth');
-const { fetchBooksFromGoogleAPI } = require('../utils/API'); // Assuming you have a function to fetch books from Google API
+// const { fetchBooksFromGoogleAPI } = require('../utils/API');
 
 const resolvers = {
   Query: {
@@ -19,17 +19,17 @@ const resolvers = {
     // Add other query resolvers if needed
 
     // Resolver for the searchGoogleBooks query
-    searchGoogleBooks: async (parent, { query }) => {
-      try {
-        // Call the function to fetch books from Google Books API
-        const response = await fetchBooksFromGoogleAPI(query);
-        // Assuming the response from fetchBooksFromGoogleAPI contains the relevant data
-        return response;
-      } catch (error) {
-        // Handle any errors that occurred during the API call
-        throw new Error('Failed to fetch books from Google Books API');
-      }
-    },
+  //   searchGoogleBooks: async (parent, { query }) => {
+  //     try {
+  //       // Call the function to fetch books from Google Books API
+  //       const response = await fetchBooksFromGoogleAPI(query);
+  //       // Assuming the response from fetchBooksFromGoogleAPI contains the relevant data
+  //       return response;
+  //     } catch (error) {
+  //       // Handle any errors that occurred during the API call
+  //       throw new Error('Failed to fetch books from Google Books API');
+  //     }
+  //   },
   },
 
   Mutation: {
@@ -52,8 +52,10 @@ const resolvers = {
       if (!correctPw) {
         throw new AuthenticationError('Incorrect credentials');
       }
+      console.log(user)
 
       const token = signToken(user);
+      console.log(token)
       return { token, user };
     },
 
