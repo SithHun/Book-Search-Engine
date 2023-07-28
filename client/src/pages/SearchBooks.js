@@ -57,7 +57,6 @@ const SearchBooks = () => {
 
       setError(null);
       setLoading(true);
-      // await getBooks({ variables: { title: searchInput } });
       setLoading(false);
     } catch (err) {
       setLoading(false);
@@ -66,23 +65,11 @@ const SearchBooks = () => {
     }
   };
 
-  // useEffect(() => {
-  //   if (data) {
-  //     const bookData = data.books.map((book) => ({
-  //       bookId: book.id,
-  //       authors: book.authors || ['No author to display'],
-  //       title: book.title,
-  //       description: book.description,
-  //       image: book.image || '',
-  //     }));
-
-  //     setSearchedBooks(bookData);
-  //     setSearchInput('');
-  //   }
-  // }, [data]);
-
   const handleSaveBook = async (bookId) => {
+    // find the book in `searchedBooks` state by the matching id
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
+
+    // get token
     const token = Auth.loggedIn() ? Auth.getToken() : null;
 
     if (!token) {
@@ -90,23 +77,15 @@ const SearchBooks = () => {
     }
 
     try {
-      setError(null);
-      await saveBook({
-        variables: { bookData: bookToSave },
-        update(cache, { data }) {
-          if (data.saveBook) {
-            const { me } = cache.readQuery({ query: QUERY_ME });
-            cache.writeQuery({
-              query: QUERY_ME,
-              data: { me: { ...me, savedBooks: [...me.savedBooks, data.saveBook] } },
-            });
-          }
-        },
-      });
+      const response = await saveBook(bookToSave, token);
 
+      if (!response.ok) {
+        throw new Error('something went wrong!');
+      }
+
+      // if book successfully saves to user's account, save book id to state
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
     } catch (err) {
-      setError('An error occurred while saving the book.');
       console.error(err);
     }
   };
