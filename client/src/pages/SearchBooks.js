@@ -8,7 +8,7 @@ import {
   Row
 } from 'react-bootstrap';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { SEARCH_BOOKS, SEARCH_GOOGLE_BOOKS } from '../utils/queries';
+import { QUERY_ME, SEARCH_GOOGLE_BOOKS } from '../utils/queries';
 import { SAVE_BOOK } from '../utils/mutations';
 import Auth from '../utils/auth';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
