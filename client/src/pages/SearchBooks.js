@@ -8,7 +8,7 @@ import {
   Row
 } from 'react-bootstrap';
 import { useLazyQuery, useMutation } from '@apollo/client';
-import { SEARCH_BOOKS } from '../utils/queries';
+import { SEARCH_BOOKS, SEARCH_GOOGLE_BOOKS } from '../utils/queries';
 import { SAVE_BOOK } from '../utils/mutations';
 import Auth from '../utils/auth';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
@@ -18,7 +18,7 @@ const SearchBooks = () => {
   const [searchInput, setSearchInput] = useState('');
   const [savedBookIds, setSavedBookIds] = useState(getSavedBookIds());
 
-  const [getBooks, { loading, data }] = useLazyQuery(SEARCH_BOOKS);
+  const [getBooks, { loading, data }] = useLazyQuery(SEARCH_GOOGLE_BOOKS);
   const [saveBook, { error }] = useMutation(SAVE_BOOK);
 
   useEffect(() => {
