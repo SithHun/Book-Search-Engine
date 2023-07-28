@@ -45,6 +45,10 @@ const typeDefs = gql`
     saveBook(bookData: BookInput!): User
     removeBook(bookId: ID!): User
   }
+
+  extend type Query {
+    searchGoogleBooks(query: String!): [Book]
+  }
 `;
 
 module.exports = typeDefs;
